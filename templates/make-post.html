@@ -46,6 +46,8 @@
             <br>
             {{ ckeditor.create() }}
           </p>
+<!--          <a href="{{ url_for('get_all_posts')}}" class="button">Submit button</a>-->
+          <input type="submit" value="Submit post">
         </form>
         {{ ckeditor.load() }}
         {{ ckeditor.config(name = 'body') }}

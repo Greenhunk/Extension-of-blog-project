@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
-from datetime import date
+from datetime import date, datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -58,9 +58,21 @@ def show_post(post_id):
 
 
 # TODO: add_new_post() to create a new blog post
-@app.route('/new-post', methods=["GET", "POST"])
+@app.route('/new-post', methods=["POST", "GET"])
 def add_new_post():
     edit_form = PostForm()
+    if request.method == "POST":
+        new_blog = BlogPost(
+            title= request.form.get("title"),
+            subtitle= request.form.get("subtitle"),
+            date= datetime.now(),
+            body= request.form.get("ckeditor"),
+            author= request.form.get("author"),
+            img_url=request.form.get("URL"),
+        )
+        db.session.add(new_blog)
+        db.session.commit()
+        return redirect(url_for('get_all_posts'))
     return render_template("make-post.html", form = edit_form)
 
 
