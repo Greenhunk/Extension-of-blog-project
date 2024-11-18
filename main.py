@@ -1,3 +1,4 @@
+from Tools.scripts.make_ctype import method
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
@@ -73,10 +74,24 @@ def add_new_post():
         db.session.add(new_blog)
         db.session.commit()
         return redirect(url_for('get_all_posts'))
+
     return render_template("make-post.html", form = edit_form)
 
 
 # TODO: edit_post() to change an existing blog post
+@app.route('/edit-post/<int:post_id>', methods= ["GET", "POST"])
+def edit_post(post_id):
+    post = db.get_or_404(BlogPost, post_id)
+    print(post.img_url, post.body)
+    edit_form = PostForm(
+        title = post.title,
+        subtitle = post.subtitle,
+        URL = post.img_url,
+        author = post.author,
+        body = post.body
+    )
+    return render_template("make-post.html", form=edit_form, is_edit=True)
+
 
 # TODO: delete_post() to remove a blog post from the database
 
