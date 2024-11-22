@@ -1,3 +1,4 @@
+
 from Tools.scripts.make_ctype import method
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
@@ -33,7 +34,7 @@ db.init_app(app)
 # CONFIGURE TABLE
 class BlogPost(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(250), nullable=False)
     subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
     date: Mapped[str] = mapped_column(String(250), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
@@ -82,7 +83,7 @@ def add_new_post():
 @app.route('/edit-post/<int:post_id>', methods= ["GET", "POST"])
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
-    print(post.img_url, post.body)
+    # print(post.img_url, post.body)
     edit_form = PostForm(
         title = post.title,
         subtitle = post.subtitle,
@@ -90,10 +91,27 @@ def edit_post(post_id):
         author = post.author,
         body = post.body
     )
+    if edit_form.validate_on_submit():
+        post.title = edit_form.title.data
+        post.subtitle = edit_form.subtitle.data
+        post.img_url = edit_form.URL.data
+        post.author = edit_form.author.data
+        post.body = edit_form.body.data
+        db.session.commit()
+        return redirect(url_for("show_post", post_id=post.id))
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
 
 # TODO: delete_post() to remove a blog post from the database
+
+@app.route("/delete/<int:post_id>")
+def delete(post_id):
+    post = db.get_or_404(BlogPost, post_id)
+    db.session.delete(post)
+    db.session.commit()
+    return redirect(url_for('get_all_posts'))
+
+
 
 # Below is the code from previous lessons. No changes needed.
 @app.route("/about")
